@@ -1,55 +1,48 @@
-from django.shortcuts import render
-from django.http import HttpResponse
-from rango.models import Page
-
-#Import the Category model
-from rango.models import Category
+from django.shortcuts import render, get_object_or_404
+from rango.models import Category, Page
 
 def index(request):
-    # Query the database for a list of ALL categories currently stored.
-    # Order the categories by the number of likes in descending order.
-    # Retrieve the top 5 only -- or all if less than 5.
-    # Place the list in our context_dict dictionary (with our boldmessage!)
-    # that will be passed to the template engine.
+    """
+    Renders the homepage with the top 5 most liked categories and most viewed pages.
+    """
+    # Get top 5 categories by likes
     category_list = Category.objects.order_by('-likes')[:5]
+    
+    # Get top 5 pages by views
+    page_list = Page.objects.order_by('-views')[:5]
 
-    context_dict = {}
-    context_dict['boldmessage'] = 'Crunchy, creamy, cookie, candy, cupcake!'
-    context_dict['categories'] = category_list
+    # Pass data to template
+    context_dict = {
+        'boldmessage': 'Hey there partner!',
+        'boldmessage': 'Crunchy, creamy, cookie, candy, cupcake!',
+        'categories': category_list,
+        'pages': page_list
+    }
 
-    # Render the response and send it back!
     return render(request, 'rango/index.html', context=context_dict)
 
 def about(request):
-    return render(request, 'rango/about.html')
+    """
+    Renders the about page.
+    """
+    context_dict = {'boldmessage': 'This tutorial has been put together with love!'}
+    return render(request, 'rango/about.html', context=context_dict)
 
 def show_category(request, category_name_slug):
-    # Create a context dictionary which we can pass
-    # to the template rendering engine.
+    """
+    Displays a specific category and its associated pages.
+    """
+    # Context dictionary to store category and related pages
     context_dict = {}
-    
-    try:
-        # Can we find a category name slug with the given name?
-        # If we can't, the .get() method raises a DoesNotExist exception.
-        # The .get() method returns one model instance or raises an exception.
-        category = Category.objects.get(slug=category_name_slug)
-        # Retrieve all of the associated pages.
-        # The filter() will return a list of page objects or an empty list.
-        
-        pages = Page.objects.filter(category=category)
-        # Adds our results list to the template context under name pages.
-        context_dict['pages'] = pages
-        # We also add the category object from
-        # the database to the context dictionary.
-        # We'll use this in the template to verify that the category exists.
-        context_dict['category'] = category
-    except Category.DoesNotExist:
-        # We get here if we didn't find the specified category.
-        # Don't do anything -
-        # the template will display the "no category" message for us.
-        context_dict['category'] = None
-        context_dict['pages'] = None
-        
-    # Go render the response and return it to the client.
-    return render(request, 'rango/category.html', context=context_dict)
 
+    # Try to retrieve category by slug
+    category = get_object_or_404(Category, slug=category_name_slug)
+
+    # Get associated pages sorted by views
+    pages = Page.objects.filter(category=category).order_by('-views')
+
+    # Add category and pages to context
+    context_dict['category'] = category
+    context_dict['pages'] = pages
+
+    return render(request, 'rango/category.html', context=context_dict)

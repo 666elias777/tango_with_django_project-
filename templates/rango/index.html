@@ -1,39 +1,62 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rango</title>
+    {% load static %}
+</head>
+<body>
+    <h1>Rango says...</h1>
+    <p>hey there partner!</p>
+    <p><Strong>Crunchy, creamy, cookie, candy, cupcake!</Strong></p>
 
-{% load static %} 
+    <!-- Links to Specific Categories Section -->
+    <h2>Categories</h2>
+    <ul>
+        <li><a href="{% url 'rango:show_category' 'python' %}">Python</a></li>
+        <li><a href="{% url 'rango:show_category' 'django' %}">Django</a></li>
+        <li><a href="{% url 'rango:show_category' 'other-frameworks' %}">Other Frameworks</a></li>
+    </ul>
 
-<html>
-
-    <head>
-        <title>Rango</title>
-    </head>
-
-    <body>
-        <h1>Rango says...</h1>
-        <div>
-            hey there partner! <br/>
-            <strong>{{ boldmessage }}</strong>
-        </div>
-
-        <div>
-        {% if categories %}
-            <ul>
-                {% for category in categories %}
+    <!-- Most Liked Categories Section -->
+    {% if categories %}
+        <h2>Most Liked Categories</h2>
+        <ul>
+            {% for category in categories %}
                 <li>
-                    <a href="/rango/category/{{ category.slug }}/">{{ category.name }}</a>
+                    <a href="{% url 'rango:show_category' category.slug %}">{{ category.name }}</a> 
+                    ({{ category.likes }} likes)
                 </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <strong>There are no categories present.</strong>
-        {% endif %}
-        </div>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No categories found.</p>
+    {% endif %}
 
-        <div>
-            <a href="{% url 'rango:about' %}">About Rango</a><br />
-            <img src="{% static 'images/rango.jpg' %}" alt="Picture of Rango" /> 
-        </div>
-    </body>
-    
+    <!-- Most Viewed Pages Section -->
+    {% if pages %}
+        <h2>Most Viewed Pages</h2>
+        <ul>
+            {% for page in pages %}
+                <li>
+                    {% if page.url|slice:":4" != "http" %}
+                        <a href="{% url 'rango:go_to_page' page.id %}">{{ page.title }}</a>
+                    {% else %}
+                        <a href="{{ page.url }}" target="_blank" rel="noopener noreferrer">{{ page.title }}</a>
+                    {% endif %}
+                    (Views: {{ page.views }})
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No pages found.</p>
+    {% endif %}
+
+    <!-- Link to About Page -->
+    <p><a href="{% url 'rango:about' %}">About</a></p>
+
+    <!-- Display Rango's Picture -->
+    <img src="{% static 'images/rango.jpg' %}" alt="Rango the Chameleon" width="300">
+</body>
 </html>
-
