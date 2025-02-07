@@ -1,5 +1,25 @@
 from django.shortcuts import render, get_object_or_404
 from rango.models import Category, Page
+from rango.forms import CategoryForm
+from django.shortcuts import redirect
+from django.urls import reverse
+from rango.forms import PageForm
+
+def add_page(request, category_name_slug):
+    category = get_object_or_404(Category, slug=category_name_slug)
+
+    if request.method == 'POST':
+        form = PageForm(request.POST)
+        if form.is_valid():
+            page = form.save(comit=FALSE)
+            page.category = category
+            page.save()
+            return redirect('rango:show_category', category_name_slug=category.slug)
+    else:
+        form = PageForm()
+
+    return render(request, 'rango/add_page.html', {'form': form, 'category': category})
+
 
 def index(request):
     """
@@ -46,3 +66,27 @@ def show_category(request, category_name_slug):
     context_dict['pages'] = pages
 
     return render(request, 'rango/category.html', context=context_dict)
+
+def add_category(request):
+    form = CategoryForm()
+    
+    # A HTTP POST?
+    if request.method == 'POST':
+        form = CategoryForm(request.POST)
+        
+        # Have we been provided with a valid form?
+        if form.is_valid():
+            # Save the new category to the database.
+            form.save(commit=True)
+            # Now that the category is saved, we could confirm this.
+            # For now, just redirect the user back to the index view.
+            return redirect('/rango/')
+        else:
+            # The supplied form contained errors -
+            # just print them to the terminal.
+            print(form.errors)
+            
+    # Will handle the bad form, new form, or no form supplied cases.
+    # Render the form with error messages (if any).
+    return render(request, 'rango/add_category.html', {'form': form})
+            

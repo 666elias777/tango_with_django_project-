@@ -11,14 +11,6 @@
     <p>hey there partner!</p>
     <p><Strong>Crunchy, creamy, cookie, candy, cupcake!</Strong></p>
 
-    <!-- Links to Specific Categories Section -->
-    <h2>Categories</h2>
-    <ul>
-        <li><a href="{% url 'rango:show_category' 'python' %}">Python</a></li>
-        <li><a href="{% url 'rango:show_category' 'django' %}">Django</a></li>
-        <li><a href="{% url 'rango:show_category' 'other-frameworks' %}">Other Frameworks</a></li>
-    </ul>
-
     <!-- Most Liked Categories Section -->
     {% if categories %}
         <h2>Most Liked Categories</h2>
@@ -55,6 +47,7 @@
 
     <!-- Link to About Page -->
     <p><a href="{% url 'rango:about' %}">About</a></p>
+    <a href="/rango/add_category/">Add a New Category</a><br />
 
     <!-- Display Rango's Picture -->
     <img src="{% static 'images/rango.jpg' %}" alt="Rango the Chameleon" width="300">
