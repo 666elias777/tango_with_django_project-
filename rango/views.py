@@ -1,9 +1,8 @@
 from django.shortcuts import render, get_object_or_404
-from rango.models import Category, Page
-from rango.forms import CategoryForm
-from django.shortcuts import redirect
 from django.urls import reverse
-from rango.forms import PageForm
+from django.shortcuts import redirect
+from rango.models import Category, Page
+from rango.forms import CategoryForm, PageForm
 
 def add_page(request, category_name_slug):
     category = get_object_or_404(Category, slug=category_name_slug)
@@ -11,15 +10,15 @@ def add_page(request, category_name_slug):
     if request.method == 'POST':
         form = PageForm(request.POST)
         if form.is_valid():
-            page = form.save(comit=FALSE)
+            page = form.save(commit=False)
             page.category = category
             page.save()
-            return redirect('rango:show_category', category_name_slug=category.slug)
+            return redirect(reverse('rango:show_category', 
+                                 kwargs={'category_name_slug': category.slug}))
     else:
         form = PageForm()
 
     return render(request, 'rango/add_page.html', {'form': form, 'category': category})
-
 
 def index(request):
     """
@@ -33,7 +32,6 @@ def index(request):
 
     # Pass data to template
     context_dict = {
-        'boldmessage': 'Hey there partner!',
         'boldmessage': 'Crunchy, creamy, cookie, candy, cupcake!',
         'categories': category_list,
         'pages': page_list
@@ -80,7 +78,7 @@ def add_category(request):
             form.save(commit=True)
             # Now that the category is saved, we could confirm this.
             # For now, just redirect the user back to the index view.
-            return redirect('/rango/')
+            return redirect(reverse('rango:index'))
         else:
             # The supplied form contained errors -
             # just print them to the terminal.
