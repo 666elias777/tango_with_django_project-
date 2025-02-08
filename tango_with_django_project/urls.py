@@ -20,10 +20,12 @@ from rango import views
 from django.conf import settings
 from django.conf.urls.static import static
 
+app_name = 'rango'
+
 urlpatterns = [
     path('', views.index, name='index'),
     path('rango/', include('rango.urls')),
-    # The above maps any URLs starting with rango/ to be handled by rango.
     path('admin/', admin.site.urls),
+    path('login', views.login_view, name='login'),
     path('category/<slug:category_name_slug>/add_page/', views.add_page, name='add_page'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

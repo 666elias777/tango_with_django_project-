@@ -1,5 +1,6 @@
 from django.contrib import admin
 from rango.models import Category, Page
+from rango.models import UserProfile
 
 # Register your models here.
 class PageInline(admin.TabularInline):
@@ -16,6 +17,7 @@ class PageAdmin(admin.ModelAdmin):
 
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Page, PageAdmin)
+admin.site.register(UserProfile)
 
 admin.site.site_header = "Rango Admin Panel"
 admin.site.site_title = "Rango Admin"
