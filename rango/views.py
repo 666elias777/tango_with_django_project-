@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from datetime import datetime
 
 def add_page(request, category_name_slug):
     category = get_object_or_404(Category, slug=category_name_slug)
@@ -26,29 +27,36 @@ def add_page(request, category_name_slug):
     pass
 
 def index(request):
-    """
-    Renders the homepage with the top 5 most liked categories and most viewed pages.
-    """
-    # Get top 5 categories by likes
     category_list = Category.objects.order_by('-likes')[:5]
-    
-    # Get top 5 pages by views
     page_list = Page.objects.order_by('-views')[:5]
 
-    # Pass data to template
+    # Call the helper function to handle cookies BEFORE rendering the response
+    visitor_cookie_handler(request)
+
     context_dict = {
         'boldmessage': 'Crunchy, creamy, cookie, candy, cupcake!',
         'categories': category_list,
-        'pages': page_list
+        'pages': page_list,
     }
 
+    # Return response back to the user
     return render(request, 'rango/index.html', context=context_dict)
 
 def about(request):
     """
-    Renders the about page.
+    Renders the about page and displays the visit count.
     """
-    context_dict = {'boldmessage': 'This tutorial has been put together with love!'}
+    # Ensure visitor cookies are processed
+    visitor_cookie_handler(request)
+
+    # Retrieve visit count from the session
+    visits = request.session.get('visits', 1)
+
+    context_dict = {
+        'boldmessage': 'This tutorial has been put together with love!',
+        'visits': visits  # Pass visit count to the template
+    }
+
     return render(request, 'rango/about.html', context=context_dict)
 
 def show_category(request, category_name_slug):
@@ -88,7 +96,7 @@ def add_category(request):
             # The supplied form contained errors -
             # just print them to the terminal.
             print(form.errors)
-            
+
     # Will handle the bad form, new form, or no form supplied cases.
     # Render the form with error messages (if any).
     return render(request, 'rango/add_category.html', {'form': form})
@@ -157,4 +165,31 @@ def user_logout(request):
     logout(request)
     # Take the user back to the homepage.
     return redirect(reverse('rango:index'))
+
+def visitor_cookie_handler(request):
+    visits = int(get_server_side_cookie(request, 'visits', '1'))
+    last_visit_cookie = get_server_side_cookie(request,
+                                                'last_visit',
+                                                str(datetime.now()))
+    last_visit_time = datetime.strptime(last_visit_cookie[:-7],
+                                            '%Y-%m-%d %H:%M:%S')
+        
+    # If it's been more than a day since the last visit...
+    if (datetime.now() - last_visit_time).days > 0:
+        visits = visits + 1
+        # Update the last visit cookie now that we have updated the count
+        request.session['last_visit'] = str(datetime.now())
+    else:
+        # Set the last visit cookie
+        request.session['last_visit'] = last_visit_cookie
+        
+    # Update/set the visits cookie
+    request.session['visits'] = visits
+
+# A helper method
+def get_server_side_cookie(request, cookie, default_val=None):
+    val = request.session.get(cookie)
+    if not val:
+        val = default_val
+    return val
         

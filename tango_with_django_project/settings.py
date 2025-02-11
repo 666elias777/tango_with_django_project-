@@ -137,6 +137,10 @@ MEDIA_URL = '/media/'
 
 LOGIN_URL = 'rango:login'
 
+# Browser length files
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
 
 
 
